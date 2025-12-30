@@ -12,6 +12,9 @@ export default defineConfig({
     tailwindcss(),
     vueDevTools(),
   ],
+
+    base: '/vue-first-project/',
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
