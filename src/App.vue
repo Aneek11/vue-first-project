@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden"
+    class="relative min-h-[100dvh] bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden"
   >
     <!-- 3D BACKGROUND -->
     <div
@@ -32,7 +32,7 @@
           class="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-700 ease-out"
           :style="{ transform: `rotateY(${flipAngle}deg)` }"
         >
-          <!-- FRONT CARD (tumhara original counter card) -->
+          <!-- FRONT CARD (original counter card) -->
           <div
             class="absolute inset-0 flex"
             :style="{ backfaceVisibility: 'hidden' }"
@@ -102,9 +102,8 @@
 
                 <!-- Helper text -->
                 <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
-                  Scroll
-                  <span class="font-semibold text-slate-200">down</span> to open
-                  the calculator on the back.
+                  Scroll <span class="font-semibold text-slate-200">down</span>
+                  (or swipe up) to open the calculator on the back.
                 </p>
               </div>
             </div>
@@ -136,10 +135,10 @@
                 <h2
                   class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-sky-300 via-indigo-300 to-sky-300 bg-clip-text text-transparent"
                 >
-                  Galaxy Calculator
+                  Galaxy Calculator ✨
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-300/90">
-                  calculator built with Vue refs and event handlers.
+                  Simple calculator built with Vue refs and event handlers.
                 </p>
               </div>
 
@@ -289,8 +288,8 @@
                 <p
                   class="text-[11px] sm:text-xs text-slate-400 mt-1 text-center"
                 >
-                  Scroll <span class="font-semibold text-slate-200">up</span> to
-                  go back to the counter card.
+                  Scroll <span class="font-semibold text-slate-200">up</span> or
+                  swipe down to go back to the counter card.
                 </p>
               </div>
             </div>
@@ -379,14 +378,13 @@ const calculate = () => {
   }
 };
 
-// ---------- THREE.JS (same base as tumhara) ----------
+// ---------- THREE.JS ----------
 let scene, camera, renderer, cube, cubeAnimationId;
-// background particles scene
 let bgScene, bgCamera, bgRenderer, bgParticles, bgAnimationId;
 
 const mouse = { x: 0, y: 0 };
 
-// star texture (round + glow)
+// star texture
 const createStarTexture = () => {
   const size = 64;
   const canvas = document.createElement("canvas");
@@ -402,8 +400,6 @@ const createStarTexture = () => {
     size / 2,
     size / 2
   );
-
-  // center bright, outer fade
   gradient.addColorStop(0, "rgba(255,255,255,1)");
   gradient.addColorStop(0.2, "rgba(255,255,255,1)");
   gradient.addColorStop(1, "rgba(255,255,255,0)");
@@ -421,17 +417,45 @@ const onMouseMove = (e) => {
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 };
 
-// scroll flip
+// desktop scroll -> flip
 const onWheel = (e) => {
   if (e.deltaY > 0 && flipAngle.value === 0) {
-    flipAngle.value = 180; // front -> back
+    flipAngle.value = 180;
   } else if (e.deltaY < 0 && flipAngle.value === 180) {
-    flipAngle.value = 0; // back -> front
+    flipAngle.value = 0;
   }
 };
 
+// mobile swipe -> flip
+let touchStartY = null;
+
+const onTouchStart = (e) => {
+  if (e.touches && e.touches.length > 0) {
+    touchStartY = e.touches[0].clientY;
+  }
+};
+
+const onTouchEnd = (e) => {
+  if (touchStartY === null) return;
+  if (!e.changedTouches || e.changedTouches.length === 0) return;
+
+  const endY = e.changedTouches[0].clientY;
+  const deltaY = endY - touchStartY;
+
+  const threshold = 40; // minimum swipe distance
+
+  if (deltaY < -threshold && flipAngle.value === 0) {
+    // swipe up -> front to back
+    flipAngle.value = 180;
+  } else if (deltaY > threshold && flipAngle.value === 180) {
+    // swipe down -> back to front
+    flipAngle.value = 0;
+  }
+
+  touchStartY = null;
+};
+
 const onResize = () => {
-  // resize cube canvas
   if (threeContainer.value && camera && renderer) {
     const w = threeContainer.value.clientWidth;
     const h = threeContainer.value.clientHeight || 1;
@@ -440,7 +464,6 @@ const onResize = () => {
     renderer.setSize(w, h);
   }
 
-  // resize bg canvas
   if (bgCamera && bgRenderer) {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -456,9 +479,7 @@ onMounted(() => {
     return;
   }
 
-  // --------------------
-  // 1) CARD CUBE SCENE
-  // --------------------
+  // cube scene
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(
@@ -496,15 +517,13 @@ onMounted(() => {
   };
   animateCube();
 
-  // --------------------
-  // 2) BACKGROUND GALAXY STARS SCENE
-  // --------------------
+  // background stars
   bgScene = new THREE.Scene();
 
   bgRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   bgRenderer.setPixelRatio(window.devicePixelRatio);
   bgRenderer.setSize(window.innerWidth, window.innerHeight);
-  bgRenderer.setClearColor(0x000000, 1); // deep space color
+  bgRenderer.setClearColor(0x000000, 1);
   bgContainer.value.appendChild(bgRenderer.domElement);
 
   bgCamera = new THREE.PerspectiveCamera(
@@ -515,10 +534,8 @@ onMounted(() => {
   );
   bgCamera.position.z = 300;
 
-  // halki fog for depth
   bgScene.fog = new THREE.Fog(0x020617, 200, 700);
 
-  // ★ STAR FIELD
   const particleCount = 1500;
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
@@ -527,14 +544,12 @@ onMounted(() => {
   for (let i = 0; i < particleCount; i++) {
     const i3 = i * 3;
 
-    // random position around camera
-    positions[i3] = (Math.random() - 0.5) * spread * 2; // x
-    positions[i3 + 1] = (Math.random() - 0.5) * spread * 1.5; // y
-    positions[i3 + 2] = (Math.random() - 0.5) * spread * 2; // z
+    positions[i3] = (Math.random() - 0.5) * spread * 2;
+    positions[i3 + 1] = (Math.random() - 0.5) * spread * 1.5;
+    positions[i3 + 2] = (Math.random() - 0.5) * spread * 2;
 
-    // random galaxy-ish color (blue/purple/white)
     const color = new THREE.Color();
-    const hue = 0.58 + Math.random() * 0.1; // around blue/purple
+    const hue = 0.58 + Math.random() * 0.1;
     const sat = 0.4 + Math.random() * 0.4;
     const light = 0.6 + Math.random() * 0.3;
     color.setHSL(hue, sat, light);
@@ -557,7 +572,7 @@ onMounted(() => {
     transparent: true,
     vertexColors: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending, // light jaisa mix
+    blending: THREE.AdditiveBlending,
   });
 
   bgParticles = new THREE.Points(bgGeometry, bgMaterial);
@@ -566,11 +581,9 @@ onMounted(() => {
   const animateBg = () => {
     bgAnimationId = requestAnimationFrame(animateBg);
 
-    // slow galaxy rotation
     bgParticles.rotation.y += 0.0008;
     bgParticles.rotation.x += 0.0003;
 
-    // mouse parallax
     const targetX = mouse.x * 30;
     const targetY = mouse.y * 15;
     bgParticles.position.x += (targetX - bgParticles.position.x) * 0.05;
@@ -583,6 +596,8 @@ onMounted(() => {
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("resize", onResize);
   window.addEventListener("wheel", onWheel, { passive: true });
+  window.addEventListener("touchstart", onTouchStart, { passive: true });
+  window.addEventListener("touchend", onTouchEnd, { passive: true });
 });
 
 onUnmounted(() => {
@@ -592,6 +607,8 @@ onUnmounted(() => {
   window.removeEventListener("mousemove", onMouseMove);
   window.removeEventListener("resize", onResize);
   window.removeEventListener("wheel", onWheel);
+  window.removeEventListener("touchstart", onTouchStart);
+  window.removeEventListener("touchend", onTouchEnd);
 
   const destroyRenderer = (r, container) => {
     if (!r) return;
