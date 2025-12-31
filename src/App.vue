@@ -1,52 +1,104 @@
 <template>
   <div
-    class="relative min-h-screen bg-slate-900 flex items-center justify-center overflow-hidden"
+    class="relative min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden"
   >
-    <!-- 3D BACKGROUND CANVAS (poori screen, card ke peeche) -->
+    <!-- 3D BACKGROUND -->
     <div
       ref="bgContainer"
       class="pointer-events-none absolute inset-0 z-0"
     ></div>
 
-    <!-- CARD -->
+    <!-- Soft gradient glow behind card -->
     <div
-      class="bg-slate-600 text-white p-8 rounded-2xl shadow-lg w-full max-w-md relative z-10"
+      class="pointer-events-none absolute inset-0 z-0 opacity-70"
+      aria-hidden="true"
     >
-      <!-- 3D Canvas (cube) -->
       <div
-        ref="threeContainer"
-        class="w-full h-48 mb-4 rounded-xl overflow-hidden"
+        class="absolute -top-40 right-10 h-72 w-72 bg-sky-500/40 blur-3xl rounded-full"
       ></div>
+      <div
+        class="absolute bottom-[-6rem] left-[-4rem] h-80 w-80 bg-indigo-500/40 blur-3xl rounded-full"
+      ></div>
+    </div>
 
-      <h1 class="text-2xl font-bold mb-4 text-center">Hello Vue + Tailwind</h1>
-
-      <p class="mb-4 text-slate-300 text-center">
-        This is my first component. The counter below is reactive.
-      </p>
-
-      <div class="flex flex-col items-center gap-4">
-        <div class="text-4xl font-semibold">
-          {{ count }}
+    <!-- CARD WRAPPER (for max-width & padding on mobile) -->
+    <div class="relative z-10 px-4 sm:px-6 w-full max-w-xl">
+      <div
+        class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01]"
+      >
+        <!-- Tiny label -->
+        <div
+          class="flex items-center gap-2 mb-4 text-xs font-medium text-slate-400"
+        >
+          <span
+            class="inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"
+          ></span>
+          <span>Vue + Three.js + Tailwind playground</span>
         </div>
 
-        <div class="flex gap-2">
-          <button
-            class="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 transition"
-            @click="increment"
+        <!-- Top: title + description -->
+        <div class="mb-6 text-center">
+          <h1
+            class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-sky-400 via-emerald-300 to-sky-400 bg-clip-text text-transparent"
           >
-            + Increment
-          </button>
-          <button
-            class="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 transition"
-            @click="reset"
+            Hello Vue Galaxy
+          </h1>
+          <p class="text-sm sm:text-base text-slate-300/90">
+            This counter is powered by Vue reactivity, wrapped in a 3D galaxy
+            background crafted with Three.js.
+          </p>
+        </div>
+
+        <!-- 3D Canvas (cube) -->
+        <div
+          ref="threeContainer"
+          class="w-full h-48 sm:h-56 mb-6 rounded-2xl overflow-hidden bg-slate-900/60 border border-slate-700/70 shadow-inner"
+        ></div>
+
+        <!-- Counter -->
+        <div class="flex flex-col items-center gap-4">
+          <div
+            class="inline-flex items-baseline gap-2 rounded-2xl bg-slate-900/70 px-5 py-3 border border-slate-700/70 shadow-inner"
           >
-            Reset
-          </button>
+            <span class="text-xs uppercase tracking-[0.2em] text-slate-400">
+              Count
+            </span>
+            <span class="text-4xl sm:text-5xl font-semibold tabular-nums">
+              {{ count }}
+            </span>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+            <button
+              class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-500 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition-colors duration-150"
+              @click="increment"
+            >
+              + Increment
+            </button>
+            <button
+              class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 text-sm font-semibold text-slate-100 border border-slate-600/70 transition-colors duration-150"
+              @click="reset"
+            >
+              Reset
+            </button>
+          </div>
+
+          <!-- Helper text -->
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
+            Each click updates a
+            <span class="font-semibold text-slate-200">reactive ref</span>
+            in Vue.
+          </p>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+
+
+
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import * as THREE from "three";
