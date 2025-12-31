@@ -1,6 +1,9 @@
 <template>
   <div
     class="relative min-h-[100dvh] bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden"
+    @wheel.passive="onWheel"
+    @touchstart.passive="onTouchStart"
+    @touchend.passive="onTouchEnd"
   >
     <!-- 3D BACKGROUND -->
     <div
@@ -102,8 +105,9 @@
 
                 <!-- Helper text -->
                 <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
-                  Scroll <span class="font-semibold text-slate-200">down</span>
-                  to open the calculator on the back.
+                  Scroll
+                  <span class="font-semibold text-slate-200">down</span> (or
+                  swipe up) to open the calculator on the back.
                 </p>
               </div>
             </div>
@@ -445,11 +449,9 @@ const onTouchEnd = (e) => {
   const threshold = 40; // minimum swipe distance
 
   if (deltaY < -threshold && flipAngle.value === 0) {
-    // swipe up -> front to back
-    flipAngle.value = 180;
+    flipAngle.value = 180; // swipe up -> show calculator
   } else if (deltaY > threshold && flipAngle.value === 180) {
-    // swipe down -> back to front
-    flipAngle.value = 0;
+    flipAngle.value = 0; // swipe down -> back to counter
   }
 
   touchStartY = null;
@@ -595,9 +597,6 @@ onMounted(() => {
 
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("resize", onResize);
-  window.addEventListener("wheel", onWheel, { passive: true });
-  window.addEventListener("touchstart", onTouchStart, { passive: true });
-  window.addEventListener("touchend", onTouchEnd, { passive: true });
 });
 
 onUnmounted(() => {
@@ -606,9 +605,6 @@ onUnmounted(() => {
 
   window.removeEventListener("mousemove", onMouseMove);
   window.removeEventListener("resize", onResize);
-  window.removeEventListener("wheel", onWheel);
-  window.removeEventListener("touchstart", onTouchStart);
-  window.removeEventListener("touchend", onTouchEnd);
 
   const destroyRenderer = (r, container) => {
     if (!r) return;
