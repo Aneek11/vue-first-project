@@ -103,7 +103,7 @@
                 <!-- Helper text -->
                 <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
                   Scroll <span class="font-semibold text-slate-200">down</span>
-                  (or swipe up) to open the calculator on the back.
+                  to open the calculator on the back.
                 </p>
               </div>
             </div>
@@ -135,7 +135,7 @@
                 <h2
                   class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-sky-300 via-indigo-300 to-sky-300 bg-clip-text text-transparent"
                 >
-                  Galaxy Calculator ✨
+                  Galaxy Calculator
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-300/90">
                   Simple calculator built with Vue refs and event handlers.
