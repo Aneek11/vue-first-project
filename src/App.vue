@@ -21,83 +21,285 @@
       ></div>
     </div>
 
-    <!-- CARD WRAPPER (for max-width & padding on mobile) -->
+    <!-- CARD FLIP WRAPPER (front = counter, back = calculator) -->
     <div class="relative z-10 px-4 sm:px-6 w-full max-w-xl">
       <div
-        class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01]"
+        class="relative w-full"
+        style="perspective: 1400px; min-height: 580px"
       >
-        <!-- Tiny label -->
+        <!-- FLIPPER -->
         <div
-          class="flex items-center gap-2 mb-4 text-xs font-medium text-slate-400"
+          class="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-700 ease-out"
+          :style="{ transform: `rotateY(${flipAngle}deg)` }"
         >
-          <span
-            class="inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"
-          ></span>
-          <span>Vue + Three.js + Tailwind playground</span>
-        </div>
-
-        <!-- Top: title + description -->
-        <div class="mb-6 text-center">
-          <h1
-            class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-sky-400 via-emerald-300 to-sky-400 bg-clip-text text-transparent"
-          >
-            Hello Vue Galaxy
-          </h1>
-          <p class="text-sm sm:text-base text-slate-300/90">
-            This counter is powered by Vue reactivity, wrapped in a 3D galaxy
-            background crafted with Three.js.
-          </p>
-        </div>
-
-        <!-- 3D Canvas (cube) -->
-        <div
-          ref="threeContainer"
-          class="w-full h-48 sm:h-56 mb-6 rounded-2xl overflow-hidden bg-slate-900/60 border border-slate-700/70 shadow-inner"
-        ></div>
-
-        <!-- Counter -->
-        <div class="flex flex-col items-center gap-4">
+          <!-- FRONT CARD (tumhara original counter card) -->
           <div
-            class="inline-flex items-baseline gap-2 rounded-2xl bg-slate-900/70 px-5 py-3 border border-slate-700/70 shadow-inner"
+            class="absolute inset-0 flex"
+            :style="{ backfaceVisibility: 'hidden' }"
           >
-            <span class="text-xs uppercase tracking-[0.2em] text-slate-400">
-              Count
-            </span>
-            <span class="text-4xl sm:text-5xl font-semibold tabular-nums">
-              {{ count }}
-            </span>
+            <div
+              class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] w-full"
+            >
+              <!-- Tiny label -->
+              <div
+                class="flex items-center gap-2 mb-4 text-xs font-medium text-slate-400"
+              >
+                <span
+                  class="inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"
+                ></span>
+                <span>Vue + Three.js + Tailwind playground</span>
+              </div>
+
+              <!-- Top: title + description -->
+              <div class="mb-6 text-center">
+                <h1
+                  class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-sky-400 via-emerald-300 to-sky-400 bg-clip-text text-transparent"
+                >
+                  Hello Vue Galaxy
+                </h1>
+                <p class="text-sm sm:text-base text-slate-300/90">
+                  This counter is powered by Vue reactivity, wrapped in a 3D
+                  galaxy background crafted with Three.js.
+                </p>
+              </div>
+
+              <!-- 3D Canvas (cube) -->
+              <div
+                ref="threeContainer"
+                class="w-full h-48 sm:h-56 mb-6 rounded-2xl overflow-hidden bg-slate-900/60 border border-slate-700/70 shadow-inner"
+              ></div>
+
+              <!-- Counter -->
+              <div class="flex flex-col items-center gap-4">
+                <div
+                  class="inline-flex items-baseline gap-2 rounded-2xl bg-slate-900/70 px-5 py-3 border border-slate-700/70 shadow-inner"
+                >
+                  <span
+                    class="text-xs uppercase tracking-[0.2em] text-slate-400"
+                  >
+                    Count
+                  </span>
+                  <span class="text-4xl sm:text-5xl font-semibold tabular-nums">
+                    {{ count }}
+                  </span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+                  <button
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-500 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition-colors duration-150"
+                    @click="increment"
+                  >
+                    + Increment
+                  </button>
+                  <button
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 text-sm font-semibold text-slate-100 border border-slate-600/70 transition-colors duration-150"
+                    @click="reset"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <!-- Helper text -->
+                <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
+                  Scroll
+                  <span class="font-semibold text-slate-200">down</span> to open
+                  the calculator on the back.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <!-- Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-            <button
-              class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-500 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition-colors duration-150"
-              @click="increment"
+          <!-- BACK CARD (calculator) -->
+          <div
+            class="absolute inset-0 flex"
+            :style="{
+              transform: 'rotateY(180deg)',
+              backfaceVisibility: 'hidden',
+            }"
+          >
+            <div
+              class="group bg-slate-900/80 border border-sky-500/40 rounded-3xl shadow-[0_24px_80px_rgba(8,47,73,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full"
             >
-              + Increment
-            </button>
-            <button
-              class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 text-sm font-semibold text-slate-100 border border-slate-600/70 transition-colors duration-150"
-              @click="reset"
-            >
-              Reset
-            </button>
-          </div>
+              <!-- Tiny label -->
+              <div
+                class="flex items-center gap-2 mb-4 text-xs font-medium text-sky-300/80"
+              >
+                <span
+                  class="inline-flex h-2 w-2 rounded-full bg-sky-400 animate-ping"
+                ></span>
+                <span>Galaxy Calculator • Back of the card</span>
+              </div>
 
-          <!-- Helper text -->
-          <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
-            Each click updates a
-            <span class="font-semibold text-slate-200">reactive ref</span>
-            in Vue.
-          </p>
+              <!-- Title -->
+              <div class="mb-4 text-center">
+                <h2
+                  class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-sky-300 via-indigo-300 to-sky-300 bg-clip-text text-transparent"
+                >
+                  Galaxy Calculator
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300/90">
+                  calculator built with Vue refs and event handlers.
+                </p>
+              </div>
+
+              <!-- CALCULATOR UI -->
+              <div class="flex flex-col items-center gap-4 mt-2">
+                <!-- Display -->
+                <div class="w-full max-w-xs">
+                  <div
+                    class="rounded-2xl bg-slate-950/80 px-4 py-3 border border-slate-700/80 shadow-inner text-right"
+                  >
+                    <div
+                      class="text-[11px] uppercase tracking-[0.15em] text-slate-500"
+                    >
+                      Galaxy Calc
+                    </div>
+                    <div
+                      class="mt-1 text-2xl sm:text-3xl font-semibold tabular-nums break-all"
+                    >
+                      {{ display }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Buttons -->
+                <div
+                  class="w-full max-w-xs grid grid-cols-4 gap-2 mt-3 text-sm select-none"
+                >
+                  <!-- Row 1 -->
+                  <button
+                    class="col-span-2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-600/80 text-slate-100 font-semibold"
+                    @click="clearAll"
+                  >
+                    C
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-600/80 text-slate-100 font-semibold"
+                    @click="deleteLast"
+                  >
+                    DEL
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-sky-500/90 hover:bg-sky-400 active:bg-sky-500 text-slate-950 font-semibold"
+                    @click="appendOperator('÷')"
+                  >
+                    ÷
+                  </button>
+
+                  <!-- Row 2 -->
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('7')"
+                  >
+                    7
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('8')"
+                  >
+                    8
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('9')"
+                  >
+                    9
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-sky-500/90 hover:bg-sky-400 active:bg-sky-500 text-slate-950 font-semibold"
+                    @click="appendOperator('×')"
+                  >
+                    ×
+                  </button>
+
+                  <!-- Row 3 -->
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('4')"
+                  >
+                    4
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('5')"
+                  >
+                    5
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('6')"
+                  >
+                    6
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-sky-500/90 hover:bg-sky-400 active:bg-sky-500 text-slate-950 font-semibold"
+                    @click="appendOperator('-')"
+                  >
+                    -
+                  </button>
+
+                  <!-- Row 4 -->
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('1')"
+                  >
+                    1
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('2')"
+                  >
+                    2
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('3')"
+                  >
+                    3
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-sky-500/90 hover:bg-sky-400 active:bg-sky-500 text-slate-950 font-semibold"
+                    @click="appendOperator('+')"
+                  >
+                    +
+                  </button>
+
+                  <!-- Row 5 -->
+                  <button
+                    class="col-span-2 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDigit('0')"
+                  >
+                    0
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:bg-slate-800 text-slate-100 font-semibold"
+                    @click="appendDot"
+                  >
+                    .
+                  </button>
+                  <button
+                    class="py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-500 text-slate-950 font-semibold shadow-lg shadow-emerald-500/40"
+                    @click="calculate"
+                  >
+                    =
+                  </button>
+                </div>
+
+                <p
+                  class="text-[11px] sm:text-xs text-slate-400 mt-1 text-center"
+                >
+                  Scroll <span class="font-semibold text-slate-200">up</span> to
+                  go back to the counter card.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-
-
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
@@ -106,15 +308,9 @@ import * as THREE from "three";
 const count = ref(0);
 const threeContainer = ref(null);
 const bgContainer = ref(null);
+const flipAngle = ref(0); // 0 = front, 180 = back
 
-// cube scene
-let scene, camera, renderer, cube, cubeAnimationId;
-// background particles scene
-let bgScene, bgCamera, bgRenderer, bgParticles, bgAnimationId;
-
-const mouse = { x: 0, y: 0 };
-
-// ---------- basic counter ----------
+// ---------- COUNTER ----------
 const increment = () => {
   count.value++;
 };
@@ -123,7 +319,74 @@ const reset = () => {
   count.value = 0;
 };
 
-// ---------- star texture (round + glow) ----------
+// ---------- CALCULATOR STATE ----------
+const display = ref("0");
+
+const clearAll = () => {
+  display.value = "0";
+};
+
+const appendDigit = (digit) => {
+  if (display.value === "0" || display.value === "Error") {
+    display.value = digit;
+  } else {
+    display.value += digit;
+  }
+};
+
+const appendDot = () => {
+  const parts = display.value.split(/[\+\-\×\÷]/);
+  const last = parts[parts.length - 1];
+  if (last.includes(".")) return;
+  display.value += ".";
+};
+
+const appendOperator = (op) => {
+  if (display.value === "Error") return;
+  const lastChar = display.value[display.value.length - 1];
+  const operators = "+-×÷";
+  if (operators.includes(lastChar)) {
+    display.value = display.value.slice(0, -1) + op;
+  } else {
+    display.value += op;
+  }
+};
+
+const deleteLast = () => {
+  if (display.value === "Error") {
+    display.value = "0";
+    return;
+  }
+  if (display.value.length <= 1) {
+    display.value = "0";
+  } else {
+    display.value = display.value.slice(0, -1);
+  }
+};
+
+const calculate = () => {
+  try {
+    const expr = display.value.replace(/×/g, "*").replace(/÷/g, "/");
+    // eslint-disable-next-line no-eval
+    const result = eval(expr);
+    if (typeof result === "number" && Number.isFinite(result)) {
+      display.value = String(parseFloat(result.toFixed(6)));
+    } else {
+      display.value = "Error";
+    }
+  } catch {
+    display.value = "Error";
+  }
+};
+
+// ---------- THREE.JS (same base as tumhara) ----------
+let scene, camera, renderer, cube, cubeAnimationId;
+// background particles scene
+let bgScene, bgCamera, bgRenderer, bgParticles, bgAnimationId;
+
+const mouse = { x: 0, y: 0 };
+
+// star texture (round + glow)
 const createStarTexture = () => {
   const size = 64;
   const canvas = document.createElement("canvas");
@@ -156,6 +419,15 @@ const createStarTexture = () => {
 const onMouseMove = (e) => {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+};
+
+// scroll flip
+const onWheel = (e) => {
+  if (e.deltaY > 0 && flipAngle.value === 0) {
+    flipAngle.value = 180; // front -> back
+  } else if (e.deltaY < 0 && flipAngle.value === 180) {
+    flipAngle.value = 0; // back -> front
+  }
 };
 
 const onResize = () => {
@@ -310,6 +582,7 @@ onMounted(() => {
 
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("resize", onResize);
+  window.addEventListener("wheel", onWheel, { passive: true });
 });
 
 onUnmounted(() => {
@@ -318,6 +591,7 @@ onUnmounted(() => {
 
   window.removeEventListener("mousemove", onMouseMove);
   window.removeEventListener("resize", onResize);
+  window.removeEventListener("wheel", onWheel);
 
   const destroyRenderer = (r, container) => {
     if (!r) return;
