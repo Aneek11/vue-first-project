@@ -3,7 +3,6 @@
     class="relative min-h-[100dvh] bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden"
     @wheel.passive="onWheel"
     @touchstart.passive="onTouchStart"
-    @touchmove.passive="onTouchMove"
     @touchend.passive="onTouchEnd"
   >
     <!-- 3D BACKGROUND -->
@@ -108,18 +107,8 @@
                 <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
                   Scroll
                   <span class="font-semibold text-slate-200">down</span> (or
-                  swipe up) to open the calculator on the back,
-                  <br />
-                  ya niche wale flip button par tap karo.
+                  swipe up) to open the calculator on the back.
                 </p>
-
-                <!-- Fallback flip button (desktop+mobile dono) -->
-                <button
-                  class="mt-1 px-4 py-1.5 rounded-full bg-sky-500/80 hover:bg-sky-400 text-xs font-semibold text-slate-950 shadow shadow-sky-500/40"
-                  @click="toggleFlip"
-                >
-                  Flip card ↻
-                </button>
               </div>
             </div>
           </div>
@@ -303,18 +292,9 @@
                 <p
                   class="text-[11px] sm:text-xs text-slate-400 mt-1 text-center"
                 >
-                  Scroll <span class="font-semibold text-slate-200">up</span> /
-                  swipe down ya
-                  <span class="font-semibold text-slate-200">Flip card</span>
-                  button dabao wapas counter ke liye.
+                  Scroll <span class="font-semibold text-slate-200">up</span> or
+                  swipe down to go back to the counter card.
                 </p>
-
-                <button
-                  class="mt-1 px-4 py-1.5 rounded-full bg-sky-500/80 hover:bg-sky-400 text-xs font-semibold text-slate-950 shadow shadow-sky-500/40"
-                  @click="toggleFlip"
-                >
-                  Flip card ↻
-                </button>
               </div>
             </div>
           </div>
@@ -332,11 +312,6 @@ const count = ref(0);
 const threeContainer = ref(null);
 const bgContainer = ref(null);
 const flipAngle = ref(0); // 0 = front, 180 = back
-
-// easy toggle for button
-const toggleFlip = () => {
-  flipAngle.value = flipAngle.value === 0 ? 180 : 0;
-};
 
 // ---------- COUNTER ----------
 const increment = () => {
@@ -457,37 +432,29 @@ const onWheel = (e) => {
 
 // mobile swipe -> flip
 let touchStartY = null;
-let touchCurrentY = null;
 
 const onTouchStart = (e) => {
   if (e.touches && e.touches.length > 0) {
     touchStartY = e.touches[0].clientY;
-    touchCurrentY = touchStartY;
   }
 };
 
-const onTouchMove = (e) => {
-  if (e.touches && e.touches.length > 0) {
-    touchCurrentY = e.touches[0].clientY;
-  }
-};
+const onTouchEnd = (e) => {
+  if (touchStartY === null) return;
+  if (!e.changedTouches || e.changedTouches.length === 0) return;
 
-const onTouchEnd = () => {
-  if (touchStartY === null || touchCurrentY === null) return;
+  const endY = e.changedTouches[0].clientY;
+  const deltaY = endY - touchStartY;
 
-  const deltaY = touchCurrentY - touchStartY;
-  const threshold = 40;
+  const threshold = 40; // minimum swipe distance
 
   if (deltaY < -threshold && flipAngle.value === 0) {
-    // swipe up -> front to back
-    flipAngle.value = 180;
+    flipAngle.value = 180; // swipe up -> show calculator
   } else if (deltaY > threshold && flipAngle.value === 180) {
-    // swipe down -> back to front
-    flipAngle.value = 0;
+    flipAngle.value = 0; // swipe down -> back to counter
   }
 
   touchStartY = null;
-  touchCurrentY = null;
 };
 
 const onResize = () => {
