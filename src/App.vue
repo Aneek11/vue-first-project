@@ -424,7 +424,8 @@ const onWheel = (e) => {
   if (isFlipping.value) return;
   
   // Minimal threshold to ignore tiny touchpad jitters
-  if (Math.abs(e.deltaY) < 10) return;
+  // Reduced from 10 to 4 to ensure it catches standard smooth scrolls
+  if (Math.abs(e.deltaY) < 4) return;
 
   if (e.deltaY > 0) {
     // Scroll Down -> Next State
@@ -499,6 +500,15 @@ const onResize = () => {
 };
 
 onMounted(() => {
+  // Use a small timeout to ensures DOM is fully painted/sized 
+  // before Three.js tries to read clientWidth/Height.
+  // This prevents the 0x0 canvas issue.
+  setTimeout(() => {
+      initThreeScenes();
+  }, 100);
+});
+
+const initThreeScenes = () => {
   if (!threeContainer.value || !bgContainer.value) {
     return;
   }
@@ -619,7 +629,7 @@ onMounted(() => {
 
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("resize", onResize);
-});
+};
 
 onUnmounted(() => {
   cancelAnimationFrame(cubeAnimationId);
