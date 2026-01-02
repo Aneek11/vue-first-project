@@ -38,9 +38,10 @@
           <!-- FRONT CARD (original counter card) -->
           <div
             class="absolute inset-0 flex backface-hidden"
+            :style="{ transform: 'translateZ(1px)' }"
           >
             <div
-              class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] w-full"
+              class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] w-full backface-hidden"
             >
               <!-- Tiny label -->
               <div
@@ -116,11 +117,11 @@
           <div
             class="absolute inset-0 flex backface-hidden"
             :style="{
-              transform: 'rotateY(180deg)',
+              transform: 'rotateY(180deg) translateZ(1px)',
             }"
           >
             <div
-              class="group bg-slate-900/80 border border-sky-500/40 rounded-3xl shadow-[0_24px_80px_rgba(8,47,73,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full"
+              class="group bg-slate-900/80 border border-sky-500/40 rounded-3xl shadow-[0_24px_80px_rgba(8,47,73,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full backface-hidden"
             >
               <!-- Tiny label -->
               <div
