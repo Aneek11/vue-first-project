@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative min-h-[100dvh] bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden"
+    class="relative min-h-[100dvh] bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden touch-none"
     @wheel.passive="onWheel"
     @touchstart.passive="onTouchStart"
     @touchend.passive="onTouchEnd"
