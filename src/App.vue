@@ -311,8 +311,8 @@
       <div 
         class="absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out pointer-events-none"
         :class="{
-          'opacity-0 translate-y-12 translate-z-[-500px] rotate-x-12': cardState !== 2,
-          'opacity-100 translate-y-0 translate-z-0 rotate-x-0 pointer-events-auto': cardState === 2
+          'opacity-0 translate-y-12 translate-z-[-500px] rotate-x-12 invisible': cardState !== 2,
+          'opacity-100 translate-y-0 translate-z-0 rotate-x-0 pointer-events-auto z-50': cardState === 2
         }"
         style="transform-style: preserve-3d;"
       >
@@ -482,12 +482,18 @@ const onMouseMove = (e) => {
 
 // desktop scroll 
 const onWheel = (e) => {
-  // Prevent rapid firing
-  // Use a small timeout or just rely on Vue's reactivity speed? 
-  // Ideally a debounce, but for now simple threshold:
-  if (Math.abs(e.deltaY) < 10) return;
+  // Simple debounce using a flag or timestamp could be better, but removing threshold first
+  // to ensure event is caught.
+  
+  // Optional: small debounce to prevent double-skips
+  if (performance.now() - (lastScrollTime || 0) < 500) return;
+  
+  const delta = e.deltaY;
+  if (Math.abs(delta) < 2) return; // minimal noise filter
 
-  if (e.deltaY > 0) {
+  lastScrollTime = performance.now();
+
+  if (delta > 0) {
     // Scroll Down -> Next State
     if (cardState.value < 2) {
       cardState.value++;
@@ -499,6 +505,8 @@ const onWheel = (e) => {
     }
   }
 };
+
+let lastScrollTime = 0;
 
 // mobile swipe
 let touchStartY = null;
