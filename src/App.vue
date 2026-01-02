@@ -1,7 +1,7 @@
 <template>
   <div
     class="relative min-h-[100dvh] bg-slate-950 text-slate-100 flex items-center justify-center overflow-hidden touch-none"
-    @wheel.passive="onWheel"
+    @wheel.prevent="onWheel"
     @touchstart.passive="onTouchStart"
     @touchend.passive="onTouchEnd"
   >
@@ -423,10 +423,9 @@ const onWheel = (e) => {
   // Immediate response if not currently animating
   if (isFlipping.value) return;
   
-  // Minimal threshold to ignore tiny touchpad jitters
-  // Reduced from 10 to 4 to ensure it catches standard smooth scrolls
-  if (Math.abs(e.deltaY) < 4) return;
-
+  // No threshold: capture ALL scrolls to fix desktop issues
+  // The 'prevent' modifier on the listener ensures we own the event.
+  
   if (e.deltaY > 0) {
     // Scroll Down -> Next State
     if (cardState.value < 2) {
@@ -499,13 +498,46 @@ const onResize = () => {
   }
 };
 
+let resizeObserver = null;
+
 onMounted(() => {
-  // Use a small timeout to ensures DOM is fully painted/sized 
-  // before Three.js tries to read clientWidth/Height.
-  // This prevents the 0x0 canvas issue.
-  setTimeout(() => {
-      initThreeScenes();
-  }, 100);
+  initThreeScenes();
+  
+  // Watch for container size changes to prevent 0x0 bug
+  if (threeContainer.value) {
+    resizeObserver = new ResizeObserver(() => {
+      onResize();
+    });
+    resizeObserver.observe(threeContainer.value);
+  }
+});
+
+onUnmounted(() => {
+  cancelAnimationFrame(cubeAnimationId);
+  cancelAnimationFrame(bgAnimationId);
+
+  window.removeEventListener("mousemove", onMouseMove);
+  window.removeEventListener("resize", onResize);
+  
+  if (resizeObserver) resizeObserver.disconnect();
+
+  const destroyRenderer = (r, container) => {
+    if (!r) return;
+    try {
+      const gl = r.getContext();
+      const loseExt = gl && gl.getExtension("WEBGL_lose_context");
+      if (loseExt) loseExt.loseContext();
+    } catch (e) {
+      console.warn("webgl destroy error", e);
+    }
+    r.dispose();
+    if (container && r.domElement && container.contains(r.domElement)) {
+      container.removeChild(r.domElement);
+    }
+  };
+
+  destroyRenderer(renderer, threeContainer.value);
+  destroyRenderer(bgRenderer, bgContainer.value);
 });
 
 const initThreeScenes = () => {
@@ -631,31 +663,7 @@ const initThreeScenes = () => {
   window.addEventListener("resize", onResize);
 };
 
-onUnmounted(() => {
-  cancelAnimationFrame(cubeAnimationId);
-  cancelAnimationFrame(bgAnimationId);
 
-  window.removeEventListener("mousemove", onMouseMove);
-  window.removeEventListener("resize", onResize);
-
-  const destroyRenderer = (r, container) => {
-    if (!r) return;
-    try {
-      const gl = r.getContext();
-      const loseExt = gl && gl.getExtension("WEBGL_lose_context");
-      if (loseExt) loseExt.loseContext();
-    } catch (e) {
-      console.warn("webgl destroy error", e);
-    }
-    r.dispose();
-    if (container && r.domElement && container.contains(r.domElement)) {
-      container.removeChild(r.domElement);
-    }
-  };
-
-  destroyRenderer(renderer, threeContainer.value);
-  destroyRenderer(bgRenderer, bgContainer.value);
-});
 </script>
 
 <style>
