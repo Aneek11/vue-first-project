@@ -519,8 +519,6 @@ onUnmounted(() => {
   window.removeEventListener("mousemove", onMouseMove);
   window.removeEventListener("resize", onResize);
   
-  if (resizeObserver) resizeObserver.disconnect();
-
   const destroyRenderer = (r, container) => {
     if (!r) return;
     try {
@@ -662,8 +660,6 @@ const initThreeScenes = () => {
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("resize", onResize);
 };
-
-
 </script>
 
 <style>
