@@ -27,28 +27,25 @@
     <!-- MAIN SCENE CONTAINER -->
     <div class="relative z-10 px-4 sm:px-6 w-full max-w-xl perspective-container">
       
-      <!-- WRAPPER FOR FLIPPING CARDS (States 0 & 1) -->
-      <!-- We hide/fade this out when state becomes 2 to make room for the 3rd card, or keep it as background -->
+      <!-- WRAPPER FOR FLIPPING CARDS -->
       <div 
         class="relative w-full transition-all duration-700 ease-out"
-        :class="{
-          'opacity-0 scale-90 translate-z-[-200px] pointer-events-none': cardState === 2,
-          'opacity-100 scale-100 translate-z-0': cardState < 2
-        }"
         style="min-height: 580px; transform-style: preserve-3d;"
       >
         <!-- FLIPPER -->
         <div
           class="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-700 ease-out"
-          :style="{ transform: `rotateY(${ cardState >= 1 ? 180 : 0 }deg)` }"
+          :style="{ transform: `rotateY(${ cardState * 180 }deg)` }"
         >
-          <!-- FRONT CARD (original counter card) -->
+          <!-- FRONT FACE (Holds two potential contents: Counter OR Bonus) -->
           <div
             class="absolute inset-0 flex backface-hidden"
             :style="{ transform: 'translateZ(1px)' }"
           >
+            <!-- CONTENT A: COUNTER (Visible when cardState is 0) -->
             <div
-              class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] w-full backface-hidden"
+              v-show="!showBonusOnFront"
+              class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] w-full backface-hidden h-full flex flex-col"
             >
               <!-- Tiny label -->
               <div
@@ -76,11 +73,11 @@
               <!-- 3D Canvas (cube) -->
               <div
                 ref="threeContainer"
-                class="w-full h-48 sm:h-56 mb-6 rounded-2xl overflow-hidden bg-slate-900/60 border border-slate-700/70 shadow-inner"
+                class="w-full h-48 sm:h-56 mb-6 rounded-2xl overflow-hidden bg-slate-900/60 border border-slate-700/70 shadow-inner shrink-0"
               ></div>
 
               <!-- Counter -->
-              <div class="flex flex-col items-center gap-4">
+              <div class="flex flex-col items-center gap-4 mt-auto">
                 <div
                   class="inline-flex items-baseline gap-2 rounded-2xl bg-slate-900/70 px-5 py-3 border border-slate-700/70 shadow-inner"
                 >
@@ -112,15 +109,60 @@
 
                 <!-- Helper text -->
                 <p class="text-xs sm:text-sm text-slate-400 mt-1 text-center">
-                  Scroll
-                  <span class="font-semibold text-slate-200">down</span> (or
-                  swipe up) to open the calculator on the back.
+                  Scroll <span class="font-semibold text-slate-200">down</span> (or
+                  swipe up) to open the calculator.
+                </p>
+              </div>
+            </div>
+
+             <!-- CONTENT C: BONUS CARD (Visible when cardState is 2) -->
+            <div 
+              v-show="showBonusOnFront"
+              class="group bg-slate-900/80 border border-purple-500/40 rounded-3xl shadow-[0_24px_80px_rgba(30,27,75,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full h-full flex flex-col justify-center items-center backface-hidden"
+            >
+               <!-- Tiny label -->
+              <div class="flex items-center gap-2 mb-4 text-xs font-medium text-purple-300/80">
+                <span class="inline-flex h-2 w-2 rounded-full bg-purple-400 animate-pulse"></span>
+                <span>Bonus Card • Vue 3D Magic</span>
+              </div>
+
+              <!-- Title -->
+              <div class="mb-4 text-center">
+                <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
+                  You Found Me!
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300/90">
+                  I was hiding behind the calculator all along.
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div class="space-y-6 text-slate-300 text-sm sm:text-base text-center w-full max-w-sm">
+                <p>
+                  By rotating 360 degrees, we return to the "front" face, but the content has magically changed!
+                </p>
+                <div class="p-6 rounded-2xl bg-slate-950/50 border border-purple-500/20 shadow-inner flex flex-col gap-2">
+                  <div class="text-slate-400 text-xs uppercase tracking-widest">Current Rotation</div>
+                  <div class="text-3xl font-mono text-purple-200">360°</div>
+                </div>
+                
+                 <div class="pt-4">
+                   <button
+                    class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold shadow-lg shadow-purple-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    @click="stateToStart"
+                  >
+                    Reset & Spin Back
+                  </button>
+                 </div>
+                 
+                 <p class="text-[11px] sm:text-xs text-slate-400 mt-2">
+                   Scroll <span class="font-semibold text-slate-200">up</span> or swipe down to go back.
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- BACK CARD (calculator) -->
+          <!-- BACK FACE (Calculator - Always visible when cardState is 1) -->
           <div
             class="absolute inset-0 flex backface-hidden"
             :style="{
@@ -128,7 +170,7 @@
             }"
           >
             <div
-              class="group bg-slate-900/80 border border-sky-500/40 rounded-3xl shadow-[0_24px_80px_rgba(8,47,73,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full backface-hidden"
+              class="group bg-slate-900/80 border border-sky-500/40 rounded-3xl shadow-[0_24px_80px_rgba(8,47,73,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full backface-hidden h-full flex flex-col"
             >
               <!-- Tiny label -->
               <div
@@ -307,66 +349,36 @@
         </div>
       </div>
 
-      <!-- THIRD CARD (Coming from background) -->
-      <div 
-        class="absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out pointer-events-none"
-        :class="{
-          'opacity-0 translate-y-12 translate-z-[-500px] rotate-x-12 invisible': cardState !== 2,
-          'opacity-100 translate-y-0 translate-z-0 rotate-x-0 pointer-events-auto z-50': cardState === 2
-        }"
-        style="transform-style: preserve-3d;"
-      >
-        <div class="group bg-slate-900/80 border border-purple-500/40 rounded-3xl shadow-[0_24px_80px_rgba(30,27,75,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full max-w-xl">
-           <!-- Tiny label -->
-           <div class="flex items-center gap-2 mb-4 text-xs font-medium text-purple-300/80">
-            <span class="inline-flex h-2 w-2 rounded-full bg-purple-400 animate-pulse"></span>
-            <span>Bonus Card • Vue 3D Magic</span>
-          </div>
 
-          <!-- Title -->
-           <div class="mb-4 text-center">
-            <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
-              Cosmic Arrival
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-300/90">
-              I arrived from the depths of the 3D background.
-            </p>
-          </div>
-
-          <!-- Content -->
-           <div class="space-y-4 text-slate-300 text-sm sm:text-base text-center">
-            <p>
-              This entire playground is built with a single persistent Three.js scene in the background.
-            </p>
-            <div class="p-4 rounded-xl bg-slate-950/50 border border-purple-500/20 shadow-inner">
-               <span class="text-purple-200 font-mono">cardState === 2</span>
-            </div>
-             <button
-              class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold shadow-lg shadow-purple-500/30 transition-all"
-              @click="stateToStart"
-            >
-              Reset to Start
-            </button>
-             <p class="text-[11px] sm:text-xs text-slate-400 mt-2">
-               Scroll <span class="font-semibold text-slate-200">up</span> or swipe down to go back.
-            </p>
-           </div>
-        </div>
-      </div>
 
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import * as THREE from "three";
 
 const count = ref(0);
 const threeContainer = ref(null);
 const bgContainer = ref(null);
-// 0 = front, 1 = back (calc), 2 = third card
+// 0 = front (counter), 1 = back (calc), 2 = front (bonus)
 const cardState = ref(0); 
+const showBonusOnFront = ref(false); // Controls what's rendered on the "Front" face
+
+// Watch state to switch front content at the right time
+// Ideally we switch content when the front face is HIDDEN (i.e., when state is 1 / back is visible)
+watch(cardState, (newVal, oldVal) => {
+  // Moving from Back(1) to Front(2): Show Bonus
+  if (oldVal === 1 && newVal === 2) {
+     showBonusOnFront.value = true;
+  }
+  // Moving from Back(1) to Front(0): Hide Bonus (Show Counter)
+  if (oldVal === 1 && newVal === 0) {
+     showBonusOnFront.value = false;
+  }
+});
+
 
 // ---------- COUNTER ----------
 const increment = () => {
@@ -378,7 +390,16 @@ const reset = () => {
 };
 
 const stateToStart = () => {
+  // If we just reset, we should probably animate back nicely?
+  // Simply setting to 0 will spin back.
   cardState.value = 0;
+  // Note: the watch will handle toggling showBonusOnFront to false when it passes through 1?
+  // Wait, if we jump 2 -> 0, it doesn't pass through 1.
+  // But 2 -> 0 is 360 -> 0 rotation. It might spin wildy?
+  // Let's just handle immediate logic:
+  setTimeout(() => {
+     if(cardState.value === 0) showBonusOnFront.value = false;
+  }, 350); // halfway through transition? Or just immediately if we want it to look reset. 
 };
 
 // ---------- CALCULATOR STATE ----------
@@ -721,17 +742,5 @@ onUnmounted(() => {
 /* Utilities for 3D transforms that Tailwind might not have by default or for custom values */
 .translate-z-0 {
   transform: translateZ(0);
-}
-.translate-z-\[-200px\] {
-  transform: translateZ(-200px);
-}
-.translate-z-\[-500px\] {
-  transform: translateZ(-500px);
-}
-.rotate-x-12 {
-  transform: rotateX(12deg) translateZ(-500px); /* Combine for the starting state */
-}
-.rotate-x-0 {
-  transform: rotateX(0deg) translateZ(0);
 }
 </style>
