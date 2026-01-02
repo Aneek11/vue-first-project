@@ -24,16 +24,23 @@
       ></div>
     </div>
 
-    <!-- CARD FLIP WRAPPER (front = counter, back = calculator) -->
-    <div class="relative z-10 px-4 sm:px-6 w-full max-w-xl">
-      <div
-        class="relative w-full"
-        style="perspective: 1400px; min-height: 580px"
+    <!-- MAIN SCENE CONTAINER -->
+    <div class="relative z-10 px-4 sm:px-6 w-full max-w-xl perspective-container">
+      
+      <!-- WRAPPER FOR FLIPPING CARDS (States 0 & 1) -->
+      <!-- We hide/fade this out when state becomes 2 to make room for the 3rd card, or keep it as background -->
+      <div 
+        class="relative w-full transition-all duration-700 ease-out"
+        :class="{
+          'opacity-0 scale-90 translate-z-[-200px] pointer-events-none': cardState === 2,
+          'opacity-100 scale-100 translate-z-0': cardState < 2
+        }"
+        style="min-height: 580px; transform-style: preserve-3d;"
       >
         <!-- FLIPPER -->
         <div
           class="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-700 ease-out"
-          :style="{ transform: `rotateY(${flipAngle}deg)` }"
+          :style="{ transform: `rotateY(${ cardState >= 1 ? 180 : 0 }deg)` }"
         >
           <!-- FRONT CARD (original counter card) -->
           <div
@@ -291,14 +298,62 @@
                 <p
                   class="text-[11px] sm:text-xs text-slate-400 mt-1 text-center"
                 >
-                  Scroll <span class="font-semibold text-slate-200">up</span> or
-                  swipe down to go back to the counter card.
+                  Scroll <span class="font-semibold text-slate-200">down</span> (swpie up) to next card, 
+                  or up (swipe down) to previous.
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- THIRD CARD (Coming from background) -->
+      <div 
+        class="absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out pointer-events-none"
+        :class="{
+          'opacity-0 translate-y-12 translate-z-[-500px] rotate-x-12': cardState !== 2,
+          'opacity-100 translate-y-0 translate-z-0 rotate-x-0 pointer-events-auto': cardState === 2
+        }"
+        style="transform-style: preserve-3d;"
+      >
+        <div class="group bg-slate-900/80 border border-purple-500/40 rounded-3xl shadow-[0_24px_80px_rgba(30,27,75,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 w-full max-w-xl">
+           <!-- Tiny label -->
+           <div class="flex items-center gap-2 mb-4 text-xs font-medium text-purple-300/80">
+            <span class="inline-flex h-2 w-2 rounded-full bg-purple-400 animate-pulse"></span>
+            <span>Bonus Card • Vue 3D Magic</span>
+          </div>
+
+          <!-- Title -->
+           <div class="mb-4 text-center">
+            <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
+              Cosmic Arrival
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300/90">
+              I arrived from the depths of the 3D background.
+            </p>
+          </div>
+
+          <!-- Content -->
+           <div class="space-y-4 text-slate-300 text-sm sm:text-base text-center">
+            <p>
+              This entire playground is built with a single persistent Three.js scene in the background.
+            </p>
+            <div class="p-4 rounded-xl bg-slate-950/50 border border-purple-500/20 shadow-inner">
+               <span class="text-purple-200 font-mono">cardState === 2</span>
+            </div>
+             <button
+              class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold shadow-lg shadow-purple-500/30 transition-all"
+              @click="stateToStart"
+            >
+              Reset to Start
+            </button>
+             <p class="text-[11px] sm:text-xs text-slate-400 mt-2">
+               Scroll <span class="font-semibold text-slate-200">up</span> or swipe down to go back.
+            </p>
+           </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -310,7 +365,8 @@ import * as THREE from "three";
 const count = ref(0);
 const threeContainer = ref(null);
 const bgContainer = ref(null);
-const flipAngle = ref(0); // 0 = front, 180 = back
+// 0 = front, 1 = back (calc), 2 = third card
+const cardState = ref(0); 
 
 // ---------- COUNTER ----------
 const increment = () => {
@@ -319,6 +375,10 @@ const increment = () => {
 
 const reset = () => {
   count.value = 0;
+};
+
+const stateToStart = () => {
+  cardState.value = 0;
 };
 
 // ---------- CALCULATOR STATE ----------
@@ -420,16 +480,27 @@ const onMouseMove = (e) => {
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 };
 
-// desktop scroll -> flip
+// desktop scroll 
 const onWheel = (e) => {
-  if (e.deltaY > 0 && flipAngle.value === 0) {
-    flipAngle.value = 180;
-  } else if (e.deltaY < 0 && flipAngle.value === 180) {
-    flipAngle.value = 0;
+  // Prevent rapid firing
+  // Use a small timeout or just rely on Vue's reactivity speed? 
+  // Ideally a debounce, but for now simple threshold:
+  if (Math.abs(e.deltaY) < 10) return;
+
+  if (e.deltaY > 0) {
+    // Scroll Down -> Next State
+    if (cardState.value < 2) {
+      cardState.value++;
+    }
+  } else {
+    // Scroll Up -> Prev State
+    if (cardState.value > 0) {
+      cardState.value--;
+    }
   }
 };
 
-// mobile swipe -> flip
+// mobile swipe
 let touchStartY = null;
 
 const onTouchStart = (e) => {
@@ -447,10 +518,16 @@ const onTouchEnd = (e) => {
 
   const threshold = 40; // minimum swipe distance
 
-  if (deltaY < -threshold && flipAngle.value === 0) {
-    flipAngle.value = 180; // swipe up -> show calculator
-  } else if (deltaY > threshold && flipAngle.value === 180) {
-    flipAngle.value = 0; // swipe down -> back to counter
+  if (deltaY < -threshold) {
+    // Swipe UP (like scrolling down) -> Next State
+    if (cardState.value < 2) {
+      cardState.value++;
+    }
+  } else if (deltaY > threshold) {
+     // Swipe DOWN (like scrolling up) -> Prev State
+     if (cardState.value > 0) {
+      cardState.value--;
+    }
   }
 
   touchStartY = null;
@@ -476,7 +553,6 @@ const onResize = () => {
 
 onMounted(() => {
   if (!threeContainer.value || !bgContainer.value) {
-    console.error("threeContainer/bgContainer null hai");
     return;
   }
 
@@ -626,8 +702,28 @@ onUnmounted(() => {
 </script>
 
 <style>
+.perspective-container {
+  perspective: 1400px;
+}
 .backface-hidden {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+}
+
+/* Utilities for 3D transforms that Tailwind might not have by default or for custom values */
+.translate-z-0 {
+  transform: translateZ(0);
+}
+.translate-z-\[-200px\] {
+  transform: translateZ(-200px);
+}
+.translate-z-\[-500px\] {
+  transform: translateZ(-500px);
+}
+.rotate-x-12 {
+  transform: rotateX(12deg) translateZ(-500px); /* Combine for the starting state */
+}
+.rotate-x-0 {
+  transform: rotateX(0deg) translateZ(0);
 }
 </style>
