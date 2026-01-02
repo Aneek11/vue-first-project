@@ -37,8 +37,7 @@
         >
           <!-- FRONT CARD (original counter card) -->
           <div
-            class="absolute inset-0 flex"
-            :style="{ backfaceVisibility: 'hidden' }"
+            class="absolute inset-0 flex backface-hidden"
           >
             <div
               class="group bg-slate-900/70 border border-slate-700/50 rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.9)] backdrop-blur-xl px-6 sm:px-8 py-7 sm:py-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] w-full"
@@ -115,10 +114,9 @@
 
           <!-- BACK CARD (calculator) -->
           <div
-            class="absolute inset-0 flex"
+            class="absolute inset-0 flex backface-hidden"
             :style="{
               transform: 'rotateY(180deg)',
-              backfaceVisibility: 'hidden',
             }"
           >
             <div
@@ -625,3 +623,10 @@ onUnmounted(() => {
   destroyRenderer(bgRenderer, bgContainer.value);
 });
 </script>
+
+<style>
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+</style>
