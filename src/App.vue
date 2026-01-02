@@ -340,7 +340,7 @@
                 <p
                   class="text-[11px] sm:text-xs text-slate-400 mt-1 text-center"
                 >
-                  Scroll <span class="font-semibold text-slate-200">down</span> (swpie up) to next card, 
+                  Scroll <span class="font-semibold text-slate-200">down</span> (swipe up) to next card, 
                   or up (swipe down) to previous.
                 </p>
               </div>
@@ -507,7 +507,7 @@ const onWheel = (e) => {
   // to ensure event is caught.
   
   // Optional: small debounce to prevent double-skips
-  if (performance.now() - (lastScrollTime || 0) < 500) return;
+  if (performance.now() - (lastScrollTime || 0) < 60) return;
   
   const delta = e.deltaY;
   if (Math.abs(delta) < 2) return; // minimal noise filter
